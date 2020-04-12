@@ -7,8 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
+num-complex = "0.2.4"
 [dependencies.linearalgebra]
 default_features = false
 git = 'https://github.com/debasish-raychawdhuri/linearalgebra-rust.git'
-rev = '221020c77b1b8d742f57d7409623019248cadfd3'
+rev = '2a121f3d3c16c3c9dd85e0b15fcc8b4274fd7fb1'

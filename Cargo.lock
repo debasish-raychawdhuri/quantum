@@ -9,7 +9,7 @@ checksum = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
 [[package]]
 name = "linearalgebra"
 version = "0.1.0"
-source = "git+https://github.com/debasish-raychawdhuri/linearalgebra-rust.git?rev=221020c77b1b8d742f57d7409623019248cadfd3#221020c77b1b8d742f57d7409623019248cadfd3"
+source = "git+https://github.com/debasish-raychawdhuri/linearalgebra-rust.git?rev=2a121f3d3c16c3c9dd85e0b15fcc8b4274fd7fb1#2a121f3d3c16c3c9dd85e0b15fcc8b4274fd7fb1"
 dependencies = [
  "num-bigint",
  "num-complex",
@@ -60,4 +60,5 @@ name = "quantum-bits"
 version = "0.1.0"
 dependencies = [
  "linearalgebra",
+ "num-complex",
 ]
