@@ -40,4 +40,36 @@ impl QCS {
         let not_gate = Matrix::new(ComplexField,vec![vec![z,o,o,z]]);
         self.gate(not_gate,&[wire])
     }
+
+    pub fn cnot(&self, control:u8, wire:u8) -> QCS{
+        let z = Complex::new(0f64,0f64);
+        let o = Complex::new(1f64, 0f64);
+        let cnot_gate = Matrix::new(ComplexField,
+        vec![
+            vec![o,z,z,z],
+            vec![z,o,z,z],
+            vec![z,z,z,o],
+            vec![z,z,o,z],
+        ]);
+        self.gate(cnot_gate,&[wire, control])
+    }
+
+    pub fn swap(&self, x:u8, y:u8) -> QCS {
+        let matrix = create_swap_matrix(self.total_qbits, x, y , ComplexField);
+        QCS{
+            total_qbits:self.total_qbits,
+            matrix
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_cnot() {
+        let s_not = QCS::new(3).cnot(1, 2).cnot(2,1).cnot(1,2);
+        let swap = QCS::new(3).swap(2,1);
+        assert_eq!(s_not, swap);
+    }
 }
