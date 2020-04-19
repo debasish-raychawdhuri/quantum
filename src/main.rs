@@ -110,7 +110,23 @@ fn stack_twice(matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
     }
     Matrix::new(ring, data)
 }
-
+pub fn conjugate_transpose(matrix: &Matrix<ComplexField>) -> Matrix<ComplexField> {
+    let ring = ComplexField;
+    let rows = matrix.rows();
+    let mut data = vec![vec![ComplexField.zero();rows];rows];
+    for i in 0..rows{
+        for j in 0..rows{
+            data[i][j]=matrix.value_at(j, i).conj();
+        }
+    }
+    Matrix::new(ring, data)
+}
+pub fn apply_matrix_to(total_qbits:u8, matrix: &Matrix<ComplexField>, bits_to_apply2:&[u8]) -> Matrix<ComplexField> {
+    let swaps = create_swap_matrix_for_entries(total_qbits, bits_to_apply2);
+    let inv_swaps = conjugate_transpose(&swaps);
+    let ramped_mat = stack_mat(total_qbits, matrix.clone());
+    inv_swaps.mul(&ramped_mat.mul(&swaps).unwrap()).unwrap()
+}
 fn print_real_matrix(mat:&Matrix<ComplexField>) {
     for i in 0..mat.rows() {
         for j in 0..mat.columns() {
@@ -133,6 +149,10 @@ fn main() {
     //print_real_matrix(&mat);
     println!("{:?}", swap_seq);
     let hp = Complex::new(1.0/(2.0 as f64).sqrt(), 0f64);
-    let mat = Matrix::new(ring,vec![vec![hp,hp], vec![hp, -hp]]);
-    print_real_matrix(&stack_mat(4, mat));
+    let mat = Matrix::new(ring.clone(),vec![vec![hp,hp], vec![hp, -hp]]);
+    let had2= apply_matrix_to(2, &mat, &vec![0]);
+    let init = Matrix::new(ring.clone(),vec![vec![Complex::new(0f64, 0f64)],
+    vec![Complex::new(0f64, 0f64)], vec![Complex::new(0f64, 0f64)], vec![Complex::new(1f64, 0f64)]]);
+    print_real_matrix(&had2);
+    print_real_matrix(&had2.mul(&init).unwrap());
 }
