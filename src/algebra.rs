@@ -1,5 +1,5 @@
 extern crate linearalgebra;
-use crate::linearalgebra::Ring;
+use linearalgebra::Ring;
 use linearalgebra::Matrix;
 use linearalgebra::field::ComplexField;
 use num_complex::Complex;
@@ -110,6 +110,7 @@ fn stack_twice(matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
     }
     Matrix::new(ring, data)
 }
+
 pub fn conjugate_transpose(matrix: &Matrix<ComplexField>) -> Matrix<ComplexField> {
     let ring = ComplexField;
     let rows = matrix.rows();
@@ -134,25 +135,4 @@ fn print_real_matrix(mat:&Matrix<ComplexField>) {
         }
         println!();
     }
-}
-
-fn main() {
-    let ring = ComplexField;
-    let total_qbits = 4;
-    let qbit_x = 1;
-    let qbit_y = 2;
-    let complex_field = ComplexField;
-
-    let mat = create_swap_matrix(total_qbits, qbit_x, qbit_y, complex_field);
-
-    let swap_seq = create_swap_sequence(total_qbits, &vec![0,1]);
-    //print_real_matrix(&mat);
-    println!("{:?}", swap_seq);
-    let hp = Complex::new(1.0/(2.0 as f64).sqrt(), 0f64);
-    let mat = Matrix::new(ring.clone(),vec![vec![hp,hp], vec![hp, -hp]]);
-    let had2= apply_matrix_to(2, &mat, &vec![0]);
-    let init = Matrix::new(ring.clone(),vec![vec![Complex::new(0f64, 0f64)],
-    vec![Complex::new(0f64, 0f64)], vec![Complex::new(0f64, 0f64)], vec![Complex::new(1f64, 0f64)]]);
-    print_real_matrix(&had2);
-    print_real_matrix(&had2.mul(&init).unwrap());
 }
