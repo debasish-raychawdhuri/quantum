@@ -1,8 +1,11 @@
 mod algebra;
+use crate::algebra::pow2;
 use linearalgebra::Matrix;
 use linearalgebra::field::ComplexField;
 use algebra::*;
 use num_complex::Complex;
+extern crate rand;
+use rand::prelude::*;
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct QCS{
@@ -61,6 +64,65 @@ impl QCS {
             matrix
         }
     }
+
+    pub fn run(&self, input: &[Complex<f64>]) -> Vec<Complex<f64>> {
+        let mut data = Vec::new();
+        for i in 0..input.len() {
+            data.push(vec![input[i]]);
+        }
+        let input_mat = Matrix::new(ComplexField,data);
+        let output_mat = self.matrix.mul(&input_mat).unwrap();
+        let mut out = Vec::new();
+        for i in 0..input.len() {
+            out.push(output_mat.value_at(i,0));
+        }
+        out
+    }
+
+    pub fn value_to_bit_vector(&self,value:usize) -> Vec<u8> {
+        let mut v = value;
+        let mut result = Vec::new();
+        for i in 0..self.total_qbits {
+            result.push((v % 2) as u8);
+            v = v/2;
+        }
+        result
+    }
+
+    pub fn value_to_tensor(&self, value:usize) -> Vec<Complex<f64>> {
+        let mut result = Vec::new();
+        let z = Complex::new(0f64,0f64);
+        let o = Complex::new(1f64, 0f64);
+        for i in 0..pow2(self.total_qbits){
+            if value == i as usize {
+                result.push(o);
+            }else {
+                result.push(z);
+            }
+        }
+        result
+    }
+
+
+
+    pub fn run_once(&self, input: &[Complex<f64>]) -> Vec<u8> {
+        let output = self.run( input);
+        let mut rng = rand::thread_rng();
+        let probabilities:Vec<f64> = output.into_iter().map(|x|{
+             ((x)*(x.conj())).re
+        }).collect();
+
+        let y:f64 = rng.gen();
+        let mut sum = 0f64;
+        for i in 0..input.len() {
+            sum += probabilities[i];
+            if sum >= y {
+                return self.value_to_bit_vector(i);
+            }
+        }
+        return self.value_to_bit_vector(input.len());
+
+    }
 }
 
 #[cfg(test)]
@@ -71,5 +133,13 @@ mod tests {
         let s_not = QCS::new(3).cnot(1, 2).cnot(2,1).cnot(1,2);
         let swap = QCS::new(3).swap(2,1);
         assert_eq!(s_not, swap);
+    }
+
+    #[test]
+    fn test_swap() {
+        let swap = QCS::new(3).swap(2,1);
+        let res = swap.run_once(&swap.value_to_tensor(2));
+        let exp = swap.value_to_bit_vector(4);
+        assert_eq!(res, exp);
     }
 }

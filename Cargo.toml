@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 num-complex = "0.2.4"
+rand = "0.7.3"
 [dependencies.linearalgebra]
 default_features = false
 git = 'https://github.com/debasish-raychawdhuri/linearalgebra-rust.git'

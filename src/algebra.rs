@@ -5,7 +5,7 @@ use linearalgebra::field::ComplexField;
 use num_complex::Complex;
 use std::num;
 
-fn pow2(x:u8) -> u8 {
+pub fn pow2(x:u8) -> u8 {
     1<<x
 }
 
