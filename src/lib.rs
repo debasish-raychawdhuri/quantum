@@ -82,7 +82,7 @@ impl QCS {
     pub fn value_to_bit_vector(&self,value:usize) -> Vec<u8> {
         let mut v = value;
         let mut result = Vec::new();
-        for i in 0..self.total_qbits {
+        for _ in 0..self.total_qbits {
             result.push((v % 2) as u8);
             v = v/2;
         }
@@ -137,9 +137,81 @@ mod tests {
 
     #[test]
     fn test_swap() {
-        let swap = QCS::new(3).swap(2,1);
-        let res = swap.run_once(&swap.value_to_tensor(2));
-        let exp = swap.value_to_bit_vector(4);
+        let swap = QCS::new(4).swap(2,1);
+        let res = swap.run_once(&swap.value_to_tensor(0b010));
+        let exp = swap.value_to_bit_vector(0b100);
         assert_eq!(res, exp);
+    }
+    #[test]
+    fn test_value_to_tensor(){
+        let test = QCS::new(2);
+        let res = test.value_to_tensor(0b00);
+        let z = Complex::new(0f64,0f64);
+        let o = Complex::new(1f64, 0f64);
+        assert_eq!(res, vec![o,z,z,z]);
+        let res = test.value_to_tensor(0b01);
+        assert_eq!(res, vec![z,o,z,z]);
+    }
+    #[test]
+    fn test_deutsch_0() {
+        let z = Complex::new(0f64,0f64);
+        let o = Complex::new(1f64, 0f64);
+        let uf = Matrix::new(ComplexField,
+        vec![
+            vec![o,z,z,z],
+            vec![z,o,z,z],
+            vec![z,z,o,z],
+            vec![z,z,z,o],
+        ]);
+        let test = QCS::new(2).hadamard(0).hadamard(1).gate(uf, &vec![0,1]).hadamard(0).hadamard(1);
+        let res = test.run_once(&test.value_to_tensor(0b01));
+        assert_eq!(res, vec![1,0]);
+    }
+
+    #[test]
+    fn test_deutsch_1() {
+        let z = Complex::new(0f64,0f64);
+        let o = Complex::new(1f64, 0f64);
+        let uf = Matrix::new(ComplexField,
+        vec![
+            vec![z,z,o,z],
+            vec![z,z,z,o],
+            vec![o,z,z,z],
+            vec![z,o,z,z],
+        ]);
+        let test = QCS::new(2).hadamard(0).hadamard(1).gate(uf, &vec![0,1]).hadamard(0).hadamard(1);
+        let res = test.run_once(&test.value_to_tensor(0b01));
+        assert_eq!(res, vec![1,0]);
+    }
+
+    #[test]
+    fn test_deutsch_i() {
+        let z = Complex::new(0f64,0f64);
+        let o = Complex::new(1f64, 0f64);
+        let uf = Matrix::new(ComplexField,
+        vec![
+            vec![o,z,z,z],
+            vec![z,o,z,z],
+            vec![z,z,z,o],
+            vec![z,z,o,z],
+        ]);
+        let test = QCS::new(2).hadamard(0).hadamard(1).gate(uf, &vec![0,1]).hadamard(0).hadamard(1);
+        let res = test.run_once(&test.value_to_tensor(0b01));
+        assert_eq!(res, vec![1,1]);
+    }
+    #[test]
+    fn test_deutsch_not() {
+        let z = Complex::new(0f64,0f64);
+        let o = Complex::new(1f64, 0f64);
+        let uf = Matrix::new(ComplexField,
+        vec![
+            vec![z,o,z,z],
+            vec![o,z,z,z],
+            vec![z,z,o,z],
+            vec![z,z,z,o],
+        ]);
+        let test = QCS::new(2).hadamard(0).hadamard(1).gate(uf, &vec![0,1]).hadamard(0).hadamard(1);
+        let res = test.run_once(&test.value_to_tensor(0b01));
+        assert_eq!(res, vec![1,1]);
     }
 }

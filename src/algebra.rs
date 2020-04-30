@@ -5,11 +5,11 @@ use linearalgebra::field::ComplexField;
 use num_complex::Complex;
 use std::num;
 
-pub fn pow2(x:u8) -> u8 {
-    1<<x
+pub fn pow2(x:u8) -> u64 {
+    1u64<<(x as u64)
 }
 
-fn get_column_for_one(size:u8, one_position: u8) -> Vec<Complex<f64>> {
+fn get_column_for_one(size:u64, one_position: u64) -> Vec<Complex<f64>> {
     let mut v = Vec::new();
     for i in 0..size {
         if i == one_position {
@@ -83,7 +83,7 @@ pub fn create_swap_matrix_for_entries(total_qbits:u8, entries:&[u8]) -> Matrix<C
 }
 fn stack_mat(total_qbits:u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
     let dim = pow2(total_qbits);
-    if dim == matrix.rows() as u8{
+    if dim == matrix.rows() as u64{
         matrix
     }else {
         stack_mat(total_qbits, stack_twice(matrix))
