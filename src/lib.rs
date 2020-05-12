@@ -13,6 +13,25 @@ pub struct QCS {
     matrix: Matrix<ComplexField>,
 }
 
+impl From<Matrix<ComplexField>> for QCS{
+
+    fn from(matrix: Matrix<ComplexField>) -> Self {
+        let mut total_qbits = 0;
+        let mut dim = matrix.rows();
+        loop {
+            if dim <= 1 {
+                break;
+            }
+            total_qbits += 1;
+            dim >>=1;
+        }
+        QCS{
+            matrix,
+            total_qbits
+        }
+    }
+}
+
 impl QCS {
     pub fn new(total_qbits: u8) -> Self {
         let complex_field = ComplexField;
@@ -23,17 +42,18 @@ impl QCS {
         }
     }
 
-    pub fn gate(&self, gate: Matrix<ComplexField>, wires: &[u8]) -> QCS {
-        let matrix = apply_matrix_to(self.total_qbits, &gate, wires);
+
+    pub fn gate(&self, gate: &QCS, wires: &[u8]) -> QCS {
+        let matrix = apply_matrix_to(self.total_qbits, &gate.matrix, wires);
         QCS {
             total_qbits: self.total_qbits,
             matrix: matrix.mul(&self.matrix).unwrap(),
         }
     }
 
-    pub fn controled_gate(&self, gate: Matrix<ComplexField>, wires: &[u8], control_wires:&[u8]) -> QCS {
+    pub fn controled_gate(&self, gate: &QCS, wires: &[u8], control_wires:&[u8]) -> QCS {
         let num_controls = control_wires.len() as u8;
-        let controled_gate = create_controled_gate(num_controls, gate);
+        let controled_gate = create_controled_gate(num_controls, &gate.matrix);
         let matrix = apply_matrix_to(self.total_qbits, &controled_gate, wires);
         QCS {
             total_qbits: self.total_qbits,
@@ -44,7 +64,7 @@ impl QCS {
     pub fn hadamard(&self, wire: u8) -> QCS {
         let hp = Complex::new(1f64 / 2f64.sqrt(), 0f64);
         self.gate(
-            Matrix::new(ComplexField, vec![vec![hp, hp], vec![hp, -hp]]),
+            &QCS{total_qbits:1, matrix: Matrix::new(ComplexField, vec![vec![hp, hp], vec![hp, -hp]])},
             &[wire],
         )
     }
@@ -52,14 +72,14 @@ impl QCS {
     pub fn not(&self, wire: u8) -> QCS {
         let z = Complex::new(0f64, 0f64);
         let o = Complex::new(1f64, 0f64);
-        let not_gate = Matrix::new(ComplexField, vec![vec![z, o],vec![o, z]]);
-        self.gate(not_gate, &[wire])
+        let not_gate = QCS{total_qbits:1, matrix: Matrix::new(ComplexField, vec![vec![z, o],vec![o, z]])};
+        self.gate(&not_gate, &[wire])
     }
 
     pub fn cnot(&self, control: u8, wire: u8) -> QCS {
         let z = Complex::new(0f64, 0f64);
         let o = Complex::new(1f64, 0f64);
-        let cnot_gate = Matrix::new(
+        let cnot_gate = QCS{total_qbits:2, matrix: Matrix::new(
             ComplexField,
             vec![
                 vec![o, z, z, z],
@@ -67,8 +87,8 @@ impl QCS {
                 vec![z, z, z, o],
                 vec![z, z, o, z],
             ],
-        );
-        self.gate(cnot_gate, &[wire, control])
+        )};
+        self.gate(&cnot_gate, &[wire, control])
     }
 
     pub fn swap(&self, x: u8, y: u8) -> QCS {
@@ -148,10 +168,9 @@ mod tests {
     fn test_controled_gate() {
         let z = Complex::new(0f64, 0f64);
         let o = Complex::new(1f64, 0f64);
-        let not_gate = Matrix::new(ComplexField, vec![vec![z, o], vec![o,z]]);
 
         let s_not = QCS::new(3).cnot(1, 2);
-        let c_not = QCS::new(3).controled_gate(not_gate, &vec![2],&vec![1]);
+        let c_not = QCS::new(3).controled_gate(&QCS::new(1).not(0), &vec![2],&vec![1]);
         assert_eq!(s_not, c_not);
     }
 
@@ -188,7 +207,7 @@ mod tests {
         let test = QCS::new(2)
             .hadamard(0)
             .hadamard(1)
-            .gate(uf, &vec![0, 1])
+            .gate(&QCS::from(uf), &vec![0, 1])
             .hadamard(0)
             .hadamard(1);
         let res = test.run_once(&test.value_to_tensor(0b01));
@@ -211,7 +230,7 @@ mod tests {
         let test = QCS::new(2)
             .hadamard(0)
             .hadamard(1)
-            .gate(uf, &vec![0, 1])
+            .gate(&QCS::from(uf), &vec![0, 1])
             .hadamard(0)
             .hadamard(1);
         let res = test.run_once(&test.value_to_tensor(0b01));
@@ -234,7 +253,7 @@ mod tests {
         let test = QCS::new(2)
             .hadamard(0)
             .hadamard(1)
-            .gate(uf, &vec![0, 1])
+            .gate(&QCS::from(uf), &vec![0, 1])
             .hadamard(0)
             .hadamard(1);
         let res = test.run_once(&test.value_to_tensor(0b01));
@@ -256,7 +275,7 @@ mod tests {
         let test = QCS::new(2)
             .hadamard(0)
             .hadamard(1)
-            .gate(uf, &vec![0, 1])
+            .gate(&QCS::from(uf), &vec![0, 1])
             .hadamard(0)
             .hadamard(1);
         let res = test.run_once(&test.value_to_tensor(0b01));

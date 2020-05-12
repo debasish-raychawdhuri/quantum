@@ -109,7 +109,7 @@ fn stack_mat(total_qbits: u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexFie
     Matrix::new(ring, data)
 }
 
-pub fn create_controled_gate(nun_controls: u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
+pub fn create_controled_gate(nun_controls: u8, matrix: &Matrix<ComplexField>) -> Matrix<ComplexField> {
     if matrix.rows() != matrix.columns() {
         panic!("Only square matrix supported");
     }
