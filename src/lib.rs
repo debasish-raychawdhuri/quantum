@@ -31,6 +31,16 @@ impl QCS {
         }
     }
 
+    pub fn controled_gate(&self, gate: Matrix<ComplexField>, wires: &[u8], control_wires:&[u8]) -> QCS {
+        let num_controls = control_wires.len() as u8;
+        let controled_gate = create_controled_gate(num_controls, gate);
+        let matrix = apply_matrix_to(self.total_qbits, &controled_gate, wires);
+        QCS {
+            total_qbits: self.total_qbits,
+            matrix: matrix.mul(&self.matrix).unwrap(),
+        }
+    }
+
     pub fn hadamard(&self, wire: u8) -> QCS {
         let hp = Complex::new(1f64 / 2f64.sqrt(), 0f64);
         self.gate(
@@ -42,7 +52,7 @@ impl QCS {
     pub fn not(&self, wire: u8) -> QCS {
         let z = Complex::new(0f64, 0f64);
         let o = Complex::new(1f64, 0f64);
-        let not_gate = Matrix::new(ComplexField, vec![vec![z, o, o, z]]);
+        let not_gate = Matrix::new(ComplexField, vec![vec![z, o],vec![o, z]]);
         self.gate(not_gate, &[wire])
     }
 
@@ -132,6 +142,17 @@ mod tests {
         let s_not = QCS::new(3).cnot(1, 2).cnot(2, 1).cnot(1, 2);
         let swap = QCS::new(3).swap(2, 1);
         assert_eq!(s_not, swap);
+    }
+
+    #[test]
+    fn test_controled_gate() {
+        let z = Complex::new(0f64, 0f64);
+        let o = Complex::new(1f64, 0f64);
+        let not_gate = Matrix::new(ComplexField, vec![vec![z, o], vec![o,z]]);
+
+        let s_not = QCS::new(3).cnot(1, 2);
+        let c_not = QCS::new(3).controled_gate(not_gate, &vec![2],&vec![1]);
+        assert_eq!(s_not, c_not);
     }
 
     #[test]

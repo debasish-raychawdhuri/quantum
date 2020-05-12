@@ -109,12 +109,12 @@ fn stack_mat(total_qbits: u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexFie
     Matrix::new(ring, data)
 }
 
-fn stack_id(total_qbits: u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
+pub fn create_controled_gate(nun_controls: u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
     if matrix.rows() != matrix.columns() {
         panic!("Only square matrix supported");
     }
     let ring = ComplexField;
-    let rows = pow2(total_qbits) as usize;
+    let rows = (pow2(nun_controls) as usize) * matrix.rows();
     let total_blocks = rows / matrix.rows();
     let mut data = vec![vec![ComplexField.zero(); rows]; rows];
     for i in 0..rows {
@@ -131,6 +131,7 @@ fn stack_id(total_qbits: u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexFiel
     }
     Matrix::new(ring, data)
 }
+
 
 pub fn conjugate_transpose(matrix: &Matrix<ComplexField>) -> Matrix<ComplexField> {
     let ring = ComplexField;
