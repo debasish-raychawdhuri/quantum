@@ -25,6 +25,7 @@ impl QCS {
     }
 
     pub fn gate(&self, gate:Matrix<ComplexField>, wires: &[u8]) -> QCS {
+
         let matrix = apply_matrix_to(self.total_qbits, &gate, wires);
         QCS {
             total_qbits:self.total_qbits,

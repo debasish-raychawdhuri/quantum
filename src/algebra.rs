@@ -81,35 +81,22 @@ pub fn create_swap_matrix_for_entries(total_qbits:u8, entries:&[u8]) -> Matrix<C
     }
     prod
 }
+
 fn stack_mat(total_qbits:u8, matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
-    let dim = pow2(total_qbits);
-    if dim == matrix.rows() as u64{
-        matrix
-    }else {
-        stack_mat(total_qbits, stack_twice(matrix))
-    }
-}
-fn stack_twice(matrix: Matrix<ComplexField>) -> Matrix<ComplexField> {
     let ring = ComplexField;
-    let rows = 2*matrix.rows();
+    let rows =pow2(total_qbits) as usize;
     let mut data = vec![vec![ComplexField.zero();rows];rows];
     for i in 0..rows{
         for j in 0..rows{
-            if i< rows/2 {
-                if j<rows/2 {
-                    data[i][j] = matrix.value_at(i, j);
-                }
-            } else{
-                if j<rows/2 {
-
-                } else{
-                    data[i][j] = matrix.value_at(i-rows/2, j-rows/2);
-                }
+            let col_block = j/matrix.rows();
+            if i >= matrix.rows() * col_block && i <  matrix.rows() * (col_block+1) {
+                data[i][j] = matrix.value_at(i-matrix.rows() * col_block,j-matrix.rows() * col_block);
             }
         }
     }
     Matrix::new(ring, data)
 }
+
 
 pub fn conjugate_transpose(matrix: &Matrix<ComplexField>) -> Matrix<ComplexField> {
     let ring = ComplexField;
