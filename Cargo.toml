@@ -12,4 +12,4 @@ rand = "0.7.3"
 [dependencies.linearalgebra]
 default_features = false
 git = 'https://github.com/debasish-raychawdhuri/linearalgebra-rust.git'
-rev = 'f16944f738e06b082742374bb8d6101a690fdecf'
+rev = 'd4b2122f65d145565960dbe5a80fc7d9bf4220d5'

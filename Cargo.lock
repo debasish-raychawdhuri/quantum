@@ -32,10 +32,11 @@ checksum = "99e85c08494b21a9054e7fe1374a732aeadaff3980b6990b94bfd3a70f690005"
 [[package]]
 name = "linearalgebra"
 version = "0.1.0"
-source = "git+https://github.com/debasish-raychawdhuri/linearalgebra-rust.git?rev=f16944f738e06b082742374bb8d6101a690fdecf#f16944f738e06b082742374bb8d6101a690fdecf"
+source = "git+https://github.com/debasish-raychawdhuri/linearalgebra-rust.git?rev=d4b2122f65d145565960dbe5a80fc7d9bf4220d5#d4b2122f65d145565960dbe5a80fc7d9bf4220d5"
 dependencies = [
  "num-bigint",
  "num-complex",
+ "num-integer",
 ]
 
 [[package]]
