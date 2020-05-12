@@ -54,7 +54,15 @@ impl QCS {
     pub fn controled_gate(&self, gate: &QCS, wires: &[u8], control_wires:&[u8]) -> QCS {
         let num_controls = control_wires.len() as u8;
         let controled_gate = create_controled_gate(num_controls, &gate.matrix);
-        let matrix = apply_matrix_to(self.total_qbits, &controled_gate, wires);
+        let mut all_wires = vec![0u8;wires.len()+control_wires.len()];
+        for i in 0..all_wires.len(){
+            if i< wires.len() {
+                all_wires[i]=wires[i];
+            }else{
+                all_wires[i]=control_wires[i-wires.len()];
+            }
+        }
+        let matrix = apply_matrix_to(self.total_qbits, &controled_gate, &all_wires);
         QCS {
             total_qbits: self.total_qbits,
             matrix: matrix.mul(&self.matrix).unwrap(),
@@ -89,6 +97,18 @@ impl QCS {
             ],
         )};
         self.gate(&cnot_gate, &[wire, control])
+    }
+
+    pub fn phase(&self, angle:f64) -> QCS {
+        let s = Complex::new(angle.cos(), angle.sin());
+        let z = Complex::new(0f64, 0f64);
+        let o = Complex::new(1f64, 0f64);
+        QCS::from(Matrix::new(ComplexField,
+            vec![
+                vec![o,z],
+                vec![z,s]
+            ]
+        ))
     }
 
     pub fn swap(&self, x: u8, y: u8) -> QCS {
@@ -166,11 +186,9 @@ mod tests {
 
     #[test]
     fn test_controled_gate() {
-        let z = Complex::new(0f64, 0f64);
-        let o = Complex::new(1f64, 0f64);
-
-        let s_not = QCS::new(3).cnot(1, 2);
-        let c_not = QCS::new(3).controled_gate(&QCS::new(1).not(0), &vec![2],&vec![1]);
+        let s_not = QCS::new(5).cnot(1, 4).cnot(2, 4);
+        let c_not = QCS::new(5).controled_gate(&QCS::new(1).not(0), &[4],&[1])
+        .controled_gate(&QCS::new(1).not(0), &[4],&[2]);
         assert_eq!(s_not, c_not);
     }
 
